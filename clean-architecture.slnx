@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Contracts/" />
+  <Folder Name="/src/Core/">
+    <Project Path="clean-architecture.domain/clean-architecture.domain.csproj" Id="f7bd993c-f17e-4846-9765-3ef0525714b5" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/" />
+  <Folder Name="/src/Presentation/" />
+  <Folder Name="/src/SharedKernel/">
+    <Project Path="SharedKernel/SharedKernel.csproj" Id="6d98cfb3-0ec2-4d45-b176-9bedf3a3c5c4" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
