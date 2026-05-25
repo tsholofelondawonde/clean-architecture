@@ -1,4 +1,6 @@
 ﻿using clean_architecture.domain.NotesManagement.Aggregates;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace clean_architecture.application.Abstractions.Data;
 
