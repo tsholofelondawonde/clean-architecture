@@ -1,0 +1,123 @@
+﻿using clean_architecture.application.Abstractions.Data;
+using clean_architecture.infrastructure.Database;
+using clean_architecture.infrastructure.DomainEvents;
+using clean_architecture.infrastructure.Time;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using SharedKernel;
+
+namespace clean_architecture.infrastructure;
+
+/// <summary>
+/// Provides extension methods for registering infrastructure services.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers all infrastructure services, including database, authentication, authorization, and health checks.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The updated service collection.</returns>
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration) =>
+        services
+            .AddServices(configuration)
+            .AddDatabase(configuration)
+            .AddHealthChecks(configuration);
+     
+    /// <summary>
+    /// Registers core infrastructure services and repositories.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The updated service collection.</returns>
+    private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+        services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+
+        services.AddHttpContextAccessor();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Configures and registers the application's database context with connection resilience.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The updated service collection.</returns>
+    private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Try to resolve connection string with fallback strategy:
+        // 1. Try "ProdDb" (production/Azure Key Vault)
+        // 2. Fall back to "LocalDb" (development)
+        // 3. Fail with helpful error message if neither exists
+        string? connectionString = configuration.GetConnectionString("ProdDb")
+            ?? configuration.GetConnectionString("LocalDb");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "No database connection string found. Ensure either 'ConnectionStrings:ProdDb' " +
+                "(for production/Azure Key Vault) or 'ConnectionStrings:LocalDb' " +
+                "(for development) is configured in appsettings.json or Azure Key Vault.");
+        }
+
+        services.AddDbContext<ApplicationDbContext>(
+            options => options
+                 .UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
+
+                    // Add connection resilience with retry policy
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorNumbersToAdd: null);
+
+                    // Set command timeout to 60 seconds for complex dashboard queries
+                    sqlOptions.CommandTimeout(60);
+                })
+                .EnableSensitiveDataLogging(false) // Disable for production
+                .EnableDetailedErrors(false)       // Disable for production
+        );
+
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers health check services for the application.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The updated service collection.</returns>
+    private static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Use the same connection string resolution strategy as AddDatabase
+        // to ensure health checks use the same connection string
+        var connectionString = configuration.GetConnectionString("ProdDb")
+            ?? configuration.GetConnectionString("LocalDb");
+
+        if (!string.IsNullOrWhiteSpace(connectionString))
+        {
+            services
+                .AddHealthChecks()
+                .AddSqlServer(connectionString);
+        }
+        else
+        {
+            // If no connection string, at least register health checks without SQL Server
+            services.AddHealthChecks();
+        }
+
+        return services;
+    }
+}
