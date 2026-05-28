@@ -41,8 +41,6 @@ public static class DependencyInjection
 
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
 
-        services.AddHttpContextAccessor();
-
         return services;
     }
 
