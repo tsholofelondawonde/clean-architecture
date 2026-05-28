@@ -59,6 +59,8 @@ public static class DependencyInjection
         string? connectionString = configuration.GetConnectionString("ProdDb")
             ?? configuration.GetConnectionString("LocalDb");
 
+        var databaseProvider = DatabaseProviderResolver.Resolve(configuration);
+
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(
@@ -68,22 +70,39 @@ public static class DependencyInjection
         }
 
         services.AddDbContext<ApplicationDbContext>(
-            options => options
-                 .UseSqlServer(connectionString, sqlOptions =>
+            options =>
+            {
+                switch (databaseProvider)
                 {
-                    sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
+                    case DatabaseProvider.SqlServer:
+                        options.UseSqlServer(connectionString, sqlOptions =>
+                        {
+                            sqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.SqlServer);
 
-                    // Add connection resilience with retry policy
-                    sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 3,
-                        maxRetryDelay: TimeSpan.FromSeconds(5),
-                        errorNumbersToAdd: null);
+                            // Add connection resilience with retry policy.
+                            sqlOptions.EnableRetryOnFailure(
+                                maxRetryCount: 3,
+                                maxRetryDelay: TimeSpan.FromSeconds(5),
+                                errorNumbersToAdd: null);
 
-                    // Set command timeout to 60 seconds for complex dashboard queries
-                    sqlOptions.CommandTimeout(60);
-                })
-                .EnableSensitiveDataLogging(false) // Disable for production
-                .EnableDetailedErrors(false)       // Disable for production
+                            // Set command timeout to 60 seconds for complex queries.
+                            sqlOptions.CommandTimeout(60);
+                        });
+                        break;
+
+                    case DatabaseProvider.PostgreSql:
+                        options.UseNpgsql(connectionString, npgsqlOptions =>
+                        {
+                            npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.PostgreSql);
+                            npgsqlOptions.CommandTimeout(60);
+                        });
+                        break;
+                }
+
+                options
+                    .EnableSensitiveDataLogging(false) // Disable for production.
+                    .EnableDetailedErrors(false);       // Disable for production.
+            }
         );
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
@@ -104,16 +123,21 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("ProdDb")
             ?? configuration.GetConnectionString("LocalDb");
 
+        var databaseProvider = DatabaseProviderResolver.Resolve(configuration);
+
+        var healthChecksBuilder = services.AddHealthChecks();
+
         if (!string.IsNullOrWhiteSpace(connectionString))
         {
-            services
-                .AddHealthChecks()
-                .AddSqlServer(connectionString);
-        }
-        else
-        {
-            // If no connection string, at least register health checks without SQL Server
-            services.AddHealthChecks();
+            switch (databaseProvider)
+            {
+                case DatabaseProvider.SqlServer:
+                    healthChecksBuilder.AddSqlServer(connectionString);
+                    break;
+                case DatabaseProvider.PostgreSql:
+                    healthChecksBuilder.AddNpgSql(connectionString);
+                    break;
+            }
         }
 
         return services;

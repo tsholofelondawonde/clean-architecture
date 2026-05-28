@@ -38,7 +38,7 @@ public class ApplicationDbContext(
 
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        builder.HasDefaultSchema(Schemas.Default);
+        builder.HasDefaultSchema(Schemas.GetDefaultSchema(Database.ProviderName));
     }
 
     private async Task PublishDomainEventsAsync()

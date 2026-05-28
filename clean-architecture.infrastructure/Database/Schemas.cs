@@ -2,5 +2,11 @@
 
 internal static class Schemas
 {
-    public const string Default = "dbo";
+    public const string SqlServer = "dbo";
+    public const string PostgreSql = "public";
+
+    public static string GetDefaultSchema(string? providerName) =>
+        providerName?.Contains("Npgsql", StringComparison.OrdinalIgnoreCase) == true
+            ? PostgreSql
+            : SqlServer;
 }
