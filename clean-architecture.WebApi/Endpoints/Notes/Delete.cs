@@ -27,6 +27,8 @@ internal sealed class Delete : IEndpoint
         .WithTags(Tags.Notes)
         .WithName("DeleteNote")
         .WithDescription("Deletes a note by its unique identifier.")
-        .WithSummary("Deletes a note.");
+        .WithSummary("Deletes a note.")
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces(StatusCodes.Status404NotFound);
     }
 }

@@ -26,6 +26,8 @@ internal sealed class GetById : IEndpoint
         .WithTags(Tags.Notes)
         .WithName("GetNotesById")
         .WithDescription("Gets a note by its unique identifier.")
-        .WithSummary("Gets a note by its unique identifier.");
+        .WithSummary("Gets a note by its unique identifier.")
+        .Produces<NoteResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
     }
 }

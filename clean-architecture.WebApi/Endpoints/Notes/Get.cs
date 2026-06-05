@@ -9,8 +9,7 @@ internal sealed class Get : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/notes/{id:guid}", async (Guid id, IQueryHandler<GetNoteQuery, List<NoteResponse>>
-        handler, CancellationToken cancellation) =>
+        app.MapGet("/notes", async (IQueryHandler<GetNoteQuery, List<NoteResponse>> handler, CancellationToken cancellation) =>
         {
             var query = new GetNoteQuery();
             var results = await handler.Handle(query, cancellation);
@@ -20,7 +19,8 @@ internal sealed class Get : IEndpoint
         })
         .WithTags(Tags.Notes)
         .WithName("GetNote")
-        .WithDescription("Get a note by its unique identifier.")
-        .WithSummary("Get a note by its unique identifier.");
+        .WithDescription("Get all notes.")
+        .WithSummary("Get all notes.")
+        .Produces<List<NoteResponse>>(StatusCodes.Status200OK);
     }
 }
