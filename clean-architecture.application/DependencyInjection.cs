@@ -45,12 +45,17 @@ public static class DependencyInjection
 
         // Apply validation decorators first so logging wraps validated handlers
         services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationDecorator.CommandHandler<,>));
-        services.Decorate(typeof(ICommandHandler<>), typeof(ValidationDecorator.CommandBaseHandler<>));
 
         // Apply logging decorators
         services.Decorate(typeof(IQueryHandler<,>), typeof(LoggingDecorator.QueryHandler<,>));
         services.Decorate(typeof(ICommandHandler<,>), typeof(LoggingDecorator.CommandHandler<,>));
-        services.Decorate(typeof(ICommandHandler<>), typeof(LoggingDecorator.CommandBaseHandler<>));
+
+        // Only decorate ICommandHandler<> (no-result variant) if implementations exist
+        if (services.Any(d => d.ServiceType == typeof(ICommandHandler<>)))
+        {
+            services.Decorate(typeof(ICommandHandler<>), typeof(ValidationDecorator.CommandBaseHandler<>));
+            services.Decorate(typeof(ICommandHandler<>), typeof(LoggingDecorator.CommandBaseHandler<>));
+        }
 
         // Register validators from this assembly (including internal types)
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
