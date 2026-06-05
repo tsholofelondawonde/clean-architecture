@@ -51,7 +51,8 @@ public static class DependencyInjection
         services.Decorate(typeof(ICommandHandler<,>), typeof(LoggingDecorator.CommandHandler<,>));
 
         // Only decorate ICommandHandler<> (no-result variant) if implementations exist
-        if (services.Any(d => d.ServiceType == typeof(ICommandHandler<>)))
+        if (services.Any(d => d.ServiceType.IsConstructedGenericType &&
+                              d.ServiceType.GetGenericTypeDefinition() == typeof(ICommandHandler<>)))
         {
             services.Decorate(typeof(ICommandHandler<>), typeof(ValidationDecorator.CommandBaseHandler<>));
             services.Decorate(typeof(ICommandHandler<>), typeof(LoggingDecorator.CommandBaseHandler<>));
