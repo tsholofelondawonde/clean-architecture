@@ -15,7 +15,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         // Set the base path to the Web API project directory
         // Navigate up from Infrastructure project to the root, then to WebApi project
         var currentDirectory = Directory.GetCurrentDirectory();
-        var basePath = Path.Combine(currentDirectory, "PolaritySystemsDemo.WebApi");
+        var basePath = Path.Combine(currentDirectory, "clean_architecture.WebApi");
 
         // If that doesn't exist, assume we're already in the WebApi directory or root
         if (!Directory.Exists(basePath))
@@ -32,7 +32,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             .Build();
 
         // Get the connection string from the configuration
-        var connectionString = configuration.GetConnectionString("ProdDb")
+        var connectionString = configuration.GetConnectionString("LocalSQLDb")
             ?? configuration.GetConnectionString("LocalDb");
 
         var databaseProvider = DatabaseProviderResolver.Resolve(configuration);

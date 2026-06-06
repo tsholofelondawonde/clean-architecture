@@ -125,7 +125,7 @@ if (app.Environment.IsDevelopment())
         options.WithTitle("Application API")
                .WithTheme(ScalarTheme.Default)
                .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-               .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json");
+               .WithOpenApiRoutePattern("/openapi/{documentName}.json");
     });
 }
 

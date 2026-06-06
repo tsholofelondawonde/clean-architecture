@@ -1,6 +1,7 @@
 ﻿using clean_architecture.WebApi.Extensions;
 using clean_architecture.WebApi.Infrastructure;
 using clean_architecture.WebApi.Middleware;
+using System.Reflection;
 
 namespace clean_architecture.WebApi;
 
@@ -25,6 +26,8 @@ public static class DependencyInjection
 
         services.AddScoped<RequestContextLoggingMiddleware>();
 
+        // Register all endpoints from this assembly
+        services.AddEndpoints(typeof(DependencyInjection).Assembly);
 
         return services;
     }

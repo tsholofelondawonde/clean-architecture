@@ -11,7 +11,7 @@ public class ApplicationDbContext(
     IDomainEventsDispatcher? domainEventsDispatcher) : DbContext(options), IApplicationDbContext
 {
     private readonly IDomainEventsDispatcher? _domainEventsDispatcher = domainEventsDispatcher;
-    public DbSet<Note> Notes { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public DbSet<Note> Notes { get; set; } = null!;
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
