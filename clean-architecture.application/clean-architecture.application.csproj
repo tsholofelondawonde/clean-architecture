@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\clean-architecture.contracts\clean-architecture.contracts.csproj" />
     <ProjectReference Include="..\clean-architecture.domain\clean-architecture.domain.csproj" />
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>

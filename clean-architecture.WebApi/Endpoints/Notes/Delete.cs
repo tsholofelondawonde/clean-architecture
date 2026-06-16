@@ -1,5 +1,5 @@
 ﻿using clean_architecture.application.Abstractions.Messaging;
-using clean_architecture.application.Notes.Delete;
+using clean_architecture.application.Features.Notes.Delete;
 using clean_architecture.WebApi.Extensions;
 using clean_architecture.WebApi.Infrastructure;
 

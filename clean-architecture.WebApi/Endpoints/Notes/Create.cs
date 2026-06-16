@@ -1,6 +1,5 @@
 ﻿using clean_architecture.application.Abstractions.Messaging;
-using clean_architecture.application.Notes.Create;
-using clean_architecture.contracts.Notes;
+using clean_architecture.application.Features.Notes.Create;
 using clean_architecture.WebApi.Extensions;
 using clean_architecture.WebApi.Infrastructure;
 
@@ -11,7 +10,7 @@ internal sealed class Create : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/notes", async (CreateNoteRequest request, ICommandHandler<CreateNoteCommand, NoteResponse> handler
+        app.MapPost("/notes", async (CreateNoteRequest request, ICommandHandler<CreateNoteCommand, CreateNoteResponse> handler
             , CancellationToken cancellation) =>
         {
             if (request is null)
@@ -37,6 +36,6 @@ internal sealed class Create : IEndpoint
         .WithName("CreateNote")
         .WithDescription("Creates a new note.")
         .WithSummary("Creates a new note with the provided title and content.")
-        .Produces<NoteResponse>(StatusCodes.Status201Created);
+        .Produces<CreateNoteResponse>(StatusCodes.Status201Created);
     }
 }

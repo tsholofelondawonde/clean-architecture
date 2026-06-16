@@ -1,11 +1,11 @@
-﻿using clean_architecture.application.Abstractions.Data;
+using clean_architecture.application.Abstractions.Data;
 using clean_architecture.application.Abstractions.Messaging;
 using clean_architecture.domain.NotesManagement.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
-namespace clean_architecture.application.Notes.Delete;
+namespace clean_architecture.application.Features.Notes.Delete;
 
 internal sealed class DeleteNoteCommandHandler(IApplicationDbContext context,
     ILogger<DeleteNoteCommandHandler> logger) : ICommandHandler<DeleteNoteCommand, bool>
