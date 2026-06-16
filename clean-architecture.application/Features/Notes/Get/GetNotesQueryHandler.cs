@@ -1,25 +1,24 @@
-﻿using clean_architecture.application.Abstractions.Data;
+using clean_architecture.application.Abstractions.Data;
 using clean_architecture.application.Abstractions.Messaging;
-using clean_architecture.contracts.Notes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
-namespace clean_architecture.application.Notes.Get;
+namespace clean_architecture.application.Features.Notes.Get;
 
-internal sealed class GetNoteQueryHandler(IApplicationDbContext context, ILogger<GetNoteQueryHandler> logger) : IQueryHandler<GetNoteQuery, List<NoteResponse>>
+internal sealed class GetNotesQueryHandler(IApplicationDbContext context, ILogger<GetNotesQueryHandler> logger) : IQueryHandler<GetNotesQuery, List<GetNotesResponse>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly ILogger<GetNoteQueryHandler> _logger = logger;
+    private readonly ILogger<GetNotesQueryHandler> _logger = logger;
 
-    public async Task<Result<List<NoteResponse>>> Handle(GetNoteQuery query, CancellationToken cancellationToken)
+    public async Task<Result<List<GetNotesResponse>>> Handle(GetNotesQuery query, CancellationToken cancellationToken)
     {
         try
         {
             var noteResponse = await _context.Notes
                 .Where(n => !n.IsDeleted)
                 .AsNoTracking()
-                .Select(n => new NoteResponse(
+                .Select(n => new GetNotesResponse(
                     n.Id,
                     n.Title.Value,
                     n.Content.Value,
@@ -34,7 +33,7 @@ internal sealed class GetNoteQueryHandler(IApplicationDbContext context, ILogger
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred while getting notes.");
-            return Result.Failure<List<NoteResponse>>(
+            return Result.Failure<List<GetNotesResponse>>(
                 Error.Problem("Note.GetFailed", "An unexpected error occurred while getting notes."));
         }
     }

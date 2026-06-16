@@ -1,6 +1,6 @@
-﻿namespace clean_architecture.contracts.Notes;
+namespace clean_architecture.application.Features.Notes.Update;
 
-public sealed record NoteResponse(
+public sealed record UpdateNoteResponse(
     Guid Id,
     string? Title,
     string? Content,

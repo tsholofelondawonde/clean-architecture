@@ -1,6 +1,5 @@
 using clean_architecture.application.Abstractions.Messaging;
-using clean_architecture.application.Notes.Update;
-using clean_architecture.contracts.Notes;
+using clean_architecture.application.Features.Notes.Update;
 using clean_architecture.WebApi.Extensions;
 using clean_architecture.WebApi.Infrastructure;
 
@@ -11,7 +10,7 @@ internal sealed class Update : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/notes/{id:guid}", async (Guid id, UpdateNoteRequest request,
-            ICommandHandler<UpdateNoteCommand, NoteResponse> handler,
+            ICommandHandler<UpdateNoteCommand, UpdateNoteResponse> handler,
             CancellationToken cancellation) =>
         {
             if (id == Guid.Empty)
@@ -45,6 +44,6 @@ internal sealed class Update : IEndpoint
         .WithName("UpdateNote")
         .WithDescription("Updates an existing note.")
         .WithSummary("Updates the title and/or content of a note by ID.")
-        .Produces<NoteResponse>(StatusCodes.Status200OK);
+        .Produces<UpdateNoteResponse>(StatusCodes.Status200OK);
     }
 }

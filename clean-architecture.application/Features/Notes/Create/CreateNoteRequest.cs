@@ -1,4 +1,4 @@
-﻿namespace clean_architecture.contracts.Notes;
+namespace clean_architecture.application.Features.Notes.Create;
 
 public sealed class CreateNoteRequest
 {
