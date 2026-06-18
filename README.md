@@ -1,6 +1,21 @@
 # clean-architecture
 
-A production-ready reference implementation of **Clean Architecture** in .NET 10, demonstrating Domain-Driven Design (DDD), CQRS, the Result pattern, and Minimal APIs. Built around a Notes Management API as the domain showcase.
+> **The template source for [CleanArchitectureGenerator](https://github.com/your-org/CleanArchitectureGenerator).**
+
+This repository is the reference implementation that the `CleanArchitectureGenerator` CLI reads, parameterises, and scaffolds into new projects. Every file here represents the output a developer receives when they run `cleanarch new`. If you want to understand what a generated solution looks like, or improve what gets generated, this is the right place.
+
+---
+
+## What This Repo Is
+
+When you run the generator:
+
+```bash
+dotnet tool install --global CleanArchitectureGenerator
+cleanarch new --name MyApp --db sqlserver
+```
+
+the CLI copies and tokenises the files in this repository — substituting project names, namespaces, and database-provider-specific code — to produce a ready-to-build solution. Changes merged here flow directly into every project scaffolded by future versions of the generator.
 
 ---
 
@@ -32,8 +47,6 @@ SharedKernel
                     └── WebApi           (inbound — HTTP endpoints)
 ```
 
-### Layers
-
 | Layer | Responsibility |
 | --- | --- |
 | **SharedKernel** | Base types: `Entity`, `ValueObject`, `Result<T>`, `Error`, domain event interfaces |
@@ -52,33 +65,31 @@ SharedKernel
 
 ---
 
-## Getting Started
+## Running This Repo Locally
+
+This repo exists primarily as a template source, but it builds and runs as a standalone API — useful for verifying changes before they flow into the generator.
 
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - SQL Server **or** PostgreSQL instance
 
-### Clone
-
-```bash
-git clone https://github.com/<your-org>/clean-architecture.git
-cd clean-architecture
-```
-
 ### Configure the database
 
-Open `clean-architecture.WebApi/appsettings.json` and set your connection string:
+Open `clean-architecture.WebApi/appsettings.Development.json` and add your connection string:
 
 ```json
 {
   "ConnectionStrings": {
-    "Database": "Server=localhost;Database=CleanArch;Trusted_Connection=True;"
+    "LocalDb": "Server=localhost;Database=CleanArch;Trusted_Connection=True;"
+  },
+  "Database": {
+    "Provider": "SqlServer"
   }
 }
 ```
 
-Switch to PostgreSQL by changing the provider key (see `Infrastructure/DependencyInjection.cs`).
+Set `"Provider"` to `"PostgreSql"` and supply a Postgres connection string to use that provider instead.
 
 ### Apply migrations
 
@@ -92,7 +103,7 @@ dotnet ef database update --project clean-architecture.infrastructure --startup-
 dotnet run --project clean-architecture.WebApi
 ```
 
-The API starts on `https://localhost:5286`. Open `https://localhost:5286/scalar` for the interactive API reference.
+The API starts on `http://localhost:5286`. Open `http://localhost:5286/scalar` for the interactive API reference (development only).
 
 ---
 
@@ -100,98 +111,52 @@ The API starts on `https://localhost:5286`. Open `https://localhost:5286/scalar`
 
 ```text
 clean-architecture/
-├── SharedKernel/                   # Base classes, Result pattern, domain event interfaces
-├── clean-architecture.domain/      # Aggregates, value objects, domain events, errors
-├── clean-architecture.application/ # CQRS handlers, validation, abstractions
-├── clean-architecture.contracts/   # Request/response DTOs (no business logic)
+├── SharedKernel/                      # Base classes, Result pattern, domain event interfaces
+├── clean-architecture.domain/         # Aggregates, value objects, domain events, errors
+├── clean-architecture.application/    # CQRS handlers, validation, abstractions
+├── clean-architecture.contracts/      # Request/response DTOs (no business logic)
 ├── clean-architecture.infrastructure/ # EF Core, migrations, event dispatcher
-├── clean-architecture.WebApi/      # Minimal API endpoints, middleware, startup
-└── clean-architecture.client/      # (Future) front-end client
-```
-
----
-
-## Key Features
-
-- **Notes CRUD** — create, read, update, and soft-delete notes via a REST API
-- **Soft Delete** — `IsDeleted` flag preserves data without hard removal
-- **Value Object Validation** — `NoteTitle` (≤ 100 chars) and `NoteContent` (≤ 1 000 chars) enforced in the domain
-- **Decorator Pipeline** — FluentValidation and structured logging applied cross-cutting without polluting handlers
-- **Multi-Database Support** — SQL Server and PostgreSQL, configurable at startup
-- **Health Checks** — `/health` endpoint reports database connectivity
-- **Global Exception Handler** — maps unhandled exceptions to RFC 9457 problem details
-- **Structured Logging** — Serilog with request-context enrichment and SQL Server persistence
-- **Scalar API Docs** — interactive OpenAPI reference at `/scalar` (development only)
-- **Centralized Package Versioning** — `Directory.Packages.props` keeps NuGet versions consistent
-
----
-
-## Development Workflow
-
-### Branching
-
-- `master` — stable, production-ready
-- `feature/<name>` — new features
-- `fix/<name>` — bug fixes
-
-Create a pull request against `master` when ready.
-
-### Adding a new use case
-
-1. **Domain** — add any new value objects or domain events to `clean-architecture.domain`
-2. **Application** — create a `Command` / `Query` record and a corresponding `Handler` in `clean-architecture.application/Notes/<Operation>/`
-3. **Contracts** — add request/response DTOs in `clean-architecture.contracts` if needed
-4. **WebApi** — register a new `IEndpoint` implementation in `clean-architecture.WebApi/Endpoints/`
-
-Use `CreateNoteCommandHandler` as a reference for commands and `GetNoteQueryHandler` for queries.
-
----
-
-## Coding Standards
-
-- **Value objects over primitives** — wrap domain concepts (`NoteTitle`, `NoteContent`) instead of using raw strings
-- **Result pattern, not exceptions** — return `Result<T>` / `Error` for expected failure paths; reserve exceptions for truly exceptional conditions
-- **Thin endpoints** — endpoints dispatch to handlers and map results; no business logic in `IEndpoint` implementations
-- **Pure handlers** — command/query handlers depend only on abstractions (`IApplicationDbContext`, `IDateTimeProvider`)
-- **Immutable records** — prefer C# `record` types for commands, queries, and DTOs
-- **No `DateTime.Now`** — use `IDateTimeProvider` for all time access so tests remain deterministic
-
----
-
-## Testing
-
-The test suite uses **xUnit** with the following supporting libraries:
-
-| Library | Purpose |
-| --- | --- |
-| Moq | Mocking dependencies |
-| FluentAssertions | Readable assertions |
-| Bogus | Fake test data generation |
-| SQLite (in-memory) | Lightweight integration testing against a real EF Core context |
-
-### Running tests
-
-```bash
-dotnet test
+└── clean-architecture.WebApi/         # Minimal API endpoints, middleware, startup
 ```
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Here's how to get started:
+Contributions are very welcome. Improvements here improve every project the generator scaffolds.
 
-1. **Fork** the repository and create a feature branch (`git checkout -b feature/my-feature`)
-2. **Follow the coding standards** described above — look at existing handlers and value objects as examples
-3. **Write tests** for new use cases (handlers, value objects, domain logic)
-4. **Open a pull request** with a clear description of the change and why it's needed
+### What to contribute
 
-Please keep pull requests focused. One feature or fix per PR makes review faster and keeps history clean.
+- **Bug fixes** in generated code (handler logic, endpoint wiring, EF Core configuration)
+- **Pattern improvements** — better ways to express CQRS, the Result pattern, or domain events
+- **New cross-cutting concerns** — additional decorators, middleware, or health check configurations worth including in a generated baseline
+- **Documentation** — clearer comments, XML doc improvements, or README updates
 
-If you find a bug or have a feature request, open an issue first so it can be discussed before work begins.
+### How to contribute
+
+1. **Fork** the repository and create a branch: `git checkout -b fix/my-fix` or `git checkout -b feature/my-feature`
+2. **Keep changes focused** — one fix or feature per PR makes review faster and keeps history readable
+3. **Verify the build passes** before opening a PR: `dotnet build && dotnet test`
+4. **Open a pull request** against `master` with a clear description of what changed and why
+
+If you're unsure whether a change belongs here, open an issue first. Some improvements are better suited to the generator itself rather than the template.
+
+### Coding standards
+
+- **Value objects over primitives** — wrap domain concepts in types (`NoteTitle`, `NoteContent`) rather than raw strings
+- **Result pattern, not exceptions** — return `Result<T>` / `Error` for expected failure paths
+- **Thin endpoints** — endpoints dispatch to handlers and map results; no business logic in `IEndpoint` implementations
+- **No `DateTime.Now`** — use `IDateTimeProvider` so tests remain deterministic
+- **Immutable records** — prefer `record` types for commands, queries, and DTOs
+
+---
+
+## Related
+
+- **[CleanArchitectureGenerator](https://github.com/your-org/CleanArchitectureGenerator)** — the CLI tool that scaffolds new solutions from this repo
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License** — see [LICENSE.txt](LICENSE.txt) for details.
+MIT — see [LICENSE.txt](LICENSE.txt) for details.
