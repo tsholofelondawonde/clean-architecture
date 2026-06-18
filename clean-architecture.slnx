@@ -1,8 +1,5 @@
 <Solution>
   <Folder Name="/src/" />
-  <Folder Name="/src/Contracts/">
-    <Project Path="clean-architecture.contracts/clean-architecture.contracts.csproj" Id="e3ccdd0c-5c39-46d5-be50-f5e9049bc0cb" />
-  </Folder>
   <Folder Name="/src/Core/">
     <Project Path="clean-architecture.application/clean-architecture.application.csproj" Id="08dbd38f-180e-4c81-80ff-aeb1e13e9f8a" />
     <Project Path="clean-architecture.domain/clean-architecture.domain.csproj" Id="f7bd993c-f17e-4846-9765-3ef0525714b5" />
@@ -10,7 +7,9 @@
   <Folder Name="/src/Infrastructure/">
     <Project Path="clean-architecture.infrastructure/clean-architecture.infrastructure.csproj" Id="f31f2efa-d6fc-4001-9bdd-c2ce7631b78f" />
   </Folder>
-  <Folder Name="/src/Presentation/" />
+  <Folder Name="/src/Presentation/">
+    <Project Path="clean-architecture.WebApi/clean-architecture.WebApi.csproj" Id="56b3acba-f6ad-4198-81b0-15baae36222b" />
+  </Folder>
   <Folder Name="/src/SharedKernel/">
     <Project Path="SharedKernel/SharedKernel.csproj" Id="6d98cfb3-0ec2-4d45-b176-9bedf3a3c5c4" />
   </Folder>

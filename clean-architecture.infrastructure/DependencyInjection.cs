@@ -56,7 +56,7 @@ public static class DependencyInjection
         // 1. Try "ProdDb" (production/Azure Key Vault)
         // 2. Fall back to "LocalDb" (development)
         // 3. Fail with helpful error message if neither exists
-        string? connectionString = configuration.GetConnectionString("ProdDb")
+        string? connectionString = configuration.GetConnectionString("LocalSQLDb")
             ?? configuration.GetConnectionString("LocalDb");
 
         var databaseProvider = DatabaseProviderResolver.Resolve(configuration);
