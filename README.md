@@ -1,6 +1,6 @@
 # clean-architecture
 
-> **The template source for [CleanArchitectureGenerator](https://github.com/your-org/CleanArchitectureGenerator).**
+> **The template source for [CleanArchitectureGenerator](https://www.nuget.org/packages/CleanArchitectureGenerator).**
 
 This repository is the reference implementation that the `CleanArchitectureGenerator` CLI reads, parameterises, and scaffolds into new projects. Every file here represents the output a developer receives when they run `cleanarch new`. If you want to understand what a generated solution looks like, or improve what gets generated, this is the right place.
 
@@ -12,7 +12,10 @@ When you run the generator:
 
 ```bash
 dotnet tool install --global CleanArchitectureGenerator
-cleanarch new --name MyApp --db sqlserver
+
+# Non-interactive (full flow):
+cleanarch new MyApp -d postgres -o ./MyApp
+cleanarch new MyApp -d sqlserver -o ./MyApp
 ```
 
 the CLI copies and tokenises the files in this repository — substituting project names, namespaces, and database-provider-specific code — to produce a ready-to-build solution. Changes merged here flow directly into every project scaffolded by future versions of the generator.
@@ -114,7 +117,6 @@ clean-architecture/
 ├── SharedKernel/                      # Base classes, Result pattern, domain event interfaces
 ├── clean-architecture.domain/         # Aggregates, value objects, domain events, errors
 ├── clean-architecture.application/    # CQRS handlers, validation, abstractions
-├── clean-architecture.contracts/      # Request/response DTOs (no business logic)
 ├── clean-architecture.infrastructure/ # EF Core, migrations, event dispatcher
 └── clean-architecture.WebApi/         # Minimal API endpoints, middleware, startup
 ```
@@ -134,10 +136,10 @@ Contributions are very welcome. Improvements here improve every project the gene
 
 ### How to contribute
 
-1. **Fork** the repository and create a branch: `git checkout -b fix/my-fix` or `git checkout -b feature/my-feature`
+1. **Fork** the repository and create a branch: `git checkout -b fix/short-description` or `git checkout -b feature/my-feature`
 2. **Keep changes focused** — one fix or feature per PR makes review faster and keeps history readable
 3. **Verify the build passes** before opening a PR: `dotnet build && dotnet test`
-4. **Open a pull request** against `master` with a clear description of what changed and why
+4. **Open a pull request** against `main` with a clear description of what changed and why
 
 If you're unsure whether a change belongs here, open an issue first. Some improvements are better suited to the generator itself rather than the template.
 
@@ -149,11 +151,6 @@ If you're unsure whether a change belongs here, open an issue first. Some improv
 - **No `DateTime.Now`** — use `IDateTimeProvider` so tests remain deterministic
 - **Immutable records** — prefer `record` types for commands, queries, and DTOs
 
----
-
-## Related
-
-- **[CleanArchitectureGenerator](https://github.com/your-org/CleanArchitectureGenerator)** — the CLI tool that scaffolds new solutions from this repo
 
 ---
 
