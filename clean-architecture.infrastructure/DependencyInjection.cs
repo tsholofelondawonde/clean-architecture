@@ -52,21 +52,14 @@ public static class DependencyInjection
     /// <returns>The updated service collection.</returns>
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
-        // Try to resolve connection string with fallback strategy:
-        // 1. Try "ProdDb" (production/Azure Key Vault)
-        // 2. Fall back to "LocalDb" (development)
-        // 3. Fail with helpful error message if neither exists
-        string? connectionString = configuration.GetConnectionString("LocalSQLDb")
-            ?? configuration.GetConnectionString("LocalDb");
+        string? connectionString = configuration.GetConnectionString("Database");
 
         var databaseProvider = DatabaseProviderResolver.Resolve(configuration);
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(
-                "No database connection string found. Ensure either 'ConnectionStrings:ProdDb' " +
-                "(for production/Azure Key Vault) or 'ConnectionStrings:LocalDb' " +
-                "(for development) is configured in appsettings.json or Azure Key Vault.");
+                "No database connection string found. Ensure 'ConnectionStrings:Database' is configured.");
         }
 
         services.AddDbContext<ApplicationDbContext>(
@@ -118,10 +111,7 @@ public static class DependencyInjection
     /// <returns>The updated service collection.</returns>
     private static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
-        // Use the same connection string resolution strategy as AddDatabase
-        // to ensure health checks use the same connection string
-        var connectionString = configuration.GetConnectionString("ProdDb")
-            ?? configuration.GetConnectionString("LocalDb");
+        var connectionString = configuration.GetConnectionString("Database");
 
         var databaseProvider = DatabaseProviderResolver.Resolve(configuration);
 

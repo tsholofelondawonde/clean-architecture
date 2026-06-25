@@ -31,16 +31,14 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             .AddEnvironmentVariables()
             .Build();
 
-        // Get the connection string from the configuration
-        var connectionString = configuration.GetConnectionString("LocalSQLDb")
-            ?? configuration.GetConnectionString("LocalDb");
+        var connectionString = configuration.GetConnectionString("Database");
 
         var databaseProvider = DatabaseProviderResolver.Resolve(configuration);
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(
-                $"No database connection string found. Ensure either 'ConnectionStrings:ProdDb' or 'ConnectionStrings:LocalDb' exists in appsettings files. " +
+                $"No database connection string found. Ensure 'ConnectionStrings:Database' exists in appsettings files. " +
                 $"Base path: {basePath}. Environment: {environment}");
         }
 
