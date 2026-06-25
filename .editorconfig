@@ -118,5 +118,9 @@ dotnet_diagnostic.S4035.severity = none
 #          set once at construction; array is the correct type for this closed, finite collection.
 dotnet_diagnostic.CA1819.severity = none
 
+# S125: Sections of code should not be commented out — GENERATOR_ASPIRE_TOKEN markers in
+#        Program.cs and Aspire template extension stubs in ServiceDefaults are intentional.
+dotnet_diagnostic.S125.severity = none
+
 [**/Migrations/*.cs]
 generated_code = true

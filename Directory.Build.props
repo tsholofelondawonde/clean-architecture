@@ -5,8 +5,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AnalysisLevel>latest</AnalysisLevel>
     <AnalysisMode>All</AnalysisMode>
-    <!-- Strict gates intentionally deferred to Phase 4:
-         TreatWarningsAsErrors / CodeAnalysisTreatWarningsAsErrors / EnforceCodeStyleInBuild -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'clean-architecture.infrastructure'">
+    <!-- Generated EF migrations excluded from strict analysis via editorconfig generated_code = true.
+         If specific IDs slip through, add targeted NoWarn entries here. -->
   </PropertyGroup>
 
   <ItemGroup>
