@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\clean-architecture.infrastructure\clean-architecture.infrastructure.csproj" />
+    <ProjectReference Include="..\clean-architecture.ServiceDefaults\clean-architecture.ServiceDefaults.csproj" />
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
 

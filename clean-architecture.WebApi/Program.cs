@@ -10,6 +10,8 @@ using Serilog.Sinks.MSSqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Configure Serilog programmatically — avoids fragile JSON array merging between appsettings and Key Vault
 Serilog.ILogger logger;
 try
@@ -102,6 +104,8 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
