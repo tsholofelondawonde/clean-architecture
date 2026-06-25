@@ -378,3 +378,6 @@ appsettings.Staging.json
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Local planning and prompt files
+DOTNET_2026_STANDARDS_PROMPT.md
