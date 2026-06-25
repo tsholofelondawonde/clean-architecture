@@ -64,7 +64,7 @@ try
             logger.Information("Serilog configured for {Environment} (Console + MSSqlServer)",
                 builder.Environment.EnvironmentName);
             logger.Information("Database connection: {ConnectionString}",
-                dbConnectionString.Replace("Password=", "Password=[REDACTED]"));
+                dbConnectionString.Replace("Password=", "Password=[REDACTED]", StringComparison.OrdinalIgnoreCase));
         }
         catch (Exception sqlEx)
         {
@@ -155,4 +155,4 @@ static Task WriteHealthCheckResponse(HttpContext context, HealthReport report)
     return context.Response.WriteAsJsonAsync(response);
 }
 
-app.Run();
+await app.RunAsync();

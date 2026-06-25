@@ -25,7 +25,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration) =>
         services
-            .AddServices(configuration)
+            .AddServices()
             .AddDatabase(configuration)
             .AddHealthChecks(configuration);
      
@@ -35,7 +35,7 @@ public static class DependencyInjection
     /// <param name="services">The service collection to add services to.</param>
     /// <param name="configuration">The application configuration.</param>
     /// <returns>The updated service collection.</returns>
-    private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 

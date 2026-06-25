@@ -20,11 +20,8 @@ public static class DependencyInjection
     /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
-        if (services is null)
-            throw new ArgumentNullException(nameof(services));
-
-        if (configuration is null)
-            throw new ArgumentNullException(nameof(configuration));
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
 
         var assembly = typeof(DependencyInjection).Assembly;
 

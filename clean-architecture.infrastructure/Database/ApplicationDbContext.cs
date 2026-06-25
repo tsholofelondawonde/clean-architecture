@@ -32,13 +32,13 @@ public class ApplicationDbContext(
         return result;
     }
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder); // Ensure the base class configurations are applied
+        base.OnModelCreating(modelBuilder);
 
-        builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        builder.HasDefaultSchema(Schemas.GetDefaultSchema(Database.ProviderName));
+        modelBuilder.HasDefaultSchema(Schemas.GetDefaultSchema(Database.ProviderName));
     }
 
     private async Task PublishDomainEventsAsync()
