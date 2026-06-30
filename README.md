@@ -31,7 +31,8 @@ the CLI copies and tokenises the files in this repository — substituting proje
 | ORM | Entity Framework Core 10 |
 | Databases | SQL Server, PostgreSQL |
 | Validation | FluentValidation 12 |
-| Logging | Serilog (console + SQL Server sink) |
+| Observability | OpenTelemetry (logs, traces, metrics via OTLP) |
+| Orchestration | .NET Aspire 13.2.4 |
 | DI Extensions | Scrutor |
 | API Docs | Scalar (OpenAPI) |
 | Testing | xUnit, Moq, FluentAssertions, Bogus |
@@ -57,6 +58,8 @@ SharedKernel
 | **Application** | Use cases as CQRS command/query handlers; validation and logging decorators |
 | **Infrastructure** | EF Core `DbContext`, migrations, domain event dispatcher, health checks, `DateTimeProvider` |
 | **WebApi** | Minimal API endpoints, global exception handler, problem-details mapping, Scalar UI |
+| **AppHost** | .NET Aspire orchestration host — wires services and resources for local development |
+| **ServiceDefaults** | Shared Aspire extension library: OpenTelemetry, service discovery, HTTP resilience, health check endpoints |
 
 ### Key Patterns
 
@@ -65,6 +68,8 @@ SharedKernel
 - **Result / Railway Pattern** — `Result<T>` and `Error` replace exception-driven flow for domain outcomes
 - **Decorator Pipeline** — `ValidationDecorator` → `LoggingDecorator` → handler, registered transparently via Scrutor
 - **Value Objects** — `NoteTitle` and `NoteContent` enforce invariants at the type level
+- **OpenTelemetry Observability** — logs (bridge), distributed traces, and runtime metrics exported via OTLP; endpoint resolved from `OpenTelemetry:OtlpEndpoint` config or the `OTEL_EXPORTER_OTLP_ENDPOINT` env var (set automatically when running under Aspire)
+- **Correlation ID** — `RequestContextLoggingMiddleware` extracts or generates a `Correlation-Id` per request and enriches OTel spans and log scopes
 
 ---
 
@@ -84,15 +89,18 @@ Open `clean-architecture.WebApi/appsettings.Development.json` and add your conne
 ```json
 {
   "ConnectionStrings": {
-    "LocalDb": "Server=localhost;Database=CleanArch;Trusted_Connection=True;"
+    "Database": "Server=localhost;Database=CleanArch;Trusted_Connection=True;"
   },
   "Database": {
     "Provider": "SqlServer"
+  },
+  "OpenTelemetry": {
+    "OtlpEndpoint": ""
   }
 }
 ```
 
-Set `"Provider"` to `"PostgreSql"` and supply a Postgres connection string to use that provider instead.
+Set `"Provider"` to `"PostgreSql"` and supply a Postgres connection string to use that provider instead. Leave `OtlpEndpoint` empty to disable OTLP export when running standalone.
 
 ### Apply migrations
 
@@ -101,6 +109,14 @@ dotnet ef database update --project clean-architecture.infrastructure --startup-
 ```
 
 ### Run
+
+**With .NET Aspire** (recommended — includes dashboard, telemetry, and service orchestration):
+
+```bash
+dotnet run --project clean-architecture.AppHost
+```
+
+**Standalone** (no Aspire dependency):
 
 ```bash
 dotnet run --project clean-architecture.WebApi
@@ -114,11 +130,13 @@ The API starts on `http://localhost:5286`. Open `http://localhost:5286/scalar` f
 
 ```text
 clean-architecture/
-├── SharedKernel/                      # Base classes, Result pattern, domain event interfaces
-├── clean-architecture.domain/         # Aggregates, value objects, domain events, errors
-├── clean-architecture.application/    # CQRS handlers, validation, abstractions
-├── clean-architecture.infrastructure/ # EF Core, migrations, event dispatcher
-└── clean-architecture.WebApi/         # Minimal API endpoints, middleware, startup
+├── SharedKernel/                          # Base classes, Result pattern, domain event interfaces
+├── clean-architecture.domain/             # Aggregates, value objects, domain events, errors
+├── clean-architecture.application/        # CQRS handlers, validation, abstractions
+├── clean-architecture.infrastructure/     # EF Core, migrations, event dispatcher
+├── clean-architecture.WebApi/             # Minimal API endpoints, middleware, startup
+├── clean-architecture.AppHost/            # .NET Aspire orchestration host (local dev)
+└── clean-architecture.ServiceDefaults/    # Shared Aspire defaults: OTel, resilience, health checks
 ```
 
 ---
@@ -150,7 +168,6 @@ If you're unsure whether a change belongs here, open an issue first. Some improv
 - **Thin endpoints** — endpoints dispatch to handlers and map results; no business logic in `IEndpoint` implementations
 - **No `DateTime.Now`** — use `IDateTimeProvider` so tests remain deterministic
 - **Immutable records** — prefer `record` types for commands, queries, and DTOs
-
 
 ---
 

@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MessagePack" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\clean-architecture.WebApi\clean-architecture.WebApi.csproj" />
   </ItemGroup>
 

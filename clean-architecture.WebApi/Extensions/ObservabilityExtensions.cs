@@ -34,11 +34,10 @@ public static class ObservabilityExtensions
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation());
 
-        // OTLP exporter — reads OTEL_EXPORTER_OTLP_ENDPOINT env var automatically.
-        // Set to your backend endpoint (Seq, Jaeger, Grafana, Azure Monitor, etc.).
-        // Omitting it is safe — telemetry is collected but not exported.
-        var otlpEndpoint = configuration["OpenTelemetry:OtlpEndpoint"]
-            ?? Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+        // Prefer explicit config key; fall back to the standard OTEL env var (injected by Aspire at runtime).
+        var otlpEndpoint = !string.IsNullOrWhiteSpace(configuration["OpenTelemetry:OtlpEndpoint"])
+            ? configuration["OpenTelemetry:OtlpEndpoint"]
+            : configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
 
         if (!string.IsNullOrWhiteSpace(otlpEndpoint))
         {
