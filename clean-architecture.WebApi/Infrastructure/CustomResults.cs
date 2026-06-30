@@ -27,7 +27,7 @@ public static class CustomResults
         return Results.Problem(
             title: GetTitle(result.Error),
             detail: GetDetail(result.Error),
-            type: GetType(result.Error.Type),
+            type: GetTypeUri(result.Error.Type),
             statusCode: GetStatusCode(result.Error.Type),
             extensions: GetErrors(result));
     }
@@ -69,7 +69,7 @@ public static class CustomResults
     /// </summary>
     /// <param name="errorType">The error type.</param>
     /// <returns>The type URI string.</returns>
-    static string GetType(ErrorType errorType) =>
+    static string GetTypeUri(ErrorType errorType) =>
         errorType switch
         {
             ErrorType.Validation => "https://tools.ietf.org/html/rfc7231#section-6.5.1",

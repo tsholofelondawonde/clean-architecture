@@ -10,7 +10,7 @@ public static class MiddlewareExtensions
 {
     /// <summary>
     /// Adds the <see cref="RequestContextLoggingMiddleware"/> to the application's request pipeline.
-    /// This middleware enriches Serilog logs with a correlation ID for each request.
+    /// This middleware enriches logs and traces with a correlation ID for each request.
     /// </summary>
     /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
     /// <returns>The <see cref="IApplicationBuilder"/> for chaining.</returns>

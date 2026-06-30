@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
 using System.Collections.Concurrent;
 
@@ -11,11 +10,8 @@ namespace clean_architecture.infrastructure.DomainEvents;
 /// can access tenant-scoped data with the same access level as the originating request.
 /// </summary>
 internal sealed class DomainEventsDispatcher(
-    IServiceProvider serviceProvider,
-    ILogger<DomainEventsDispatcher> logger) : IDomainEventsDispatcher
+    IServiceProvider serviceProvider) : IDomainEventsDispatcher
 {
-    private readonly ILogger<DomainEventsDispatcher> _logger = logger;
-
     /// <summary>
     /// Caches the mapping between domain event types and their handler interface types.
     /// </summary>

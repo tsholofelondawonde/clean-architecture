@@ -7,6 +7,10 @@
   <Folder Name="/src/Infrastructure/">
     <Project Path="clean-architecture.infrastructure/clean-architecture.infrastructure.csproj" Id="f31f2efa-d6fc-4001-9bdd-c2ce7631b78f" />
   </Folder>
+  <Folder Name="/src/Aspire/">
+    <Project Path="clean-architecture.AppHost/clean-architecture.AppHost.csproj" Id="1efbc713-3195-46f2-8e75-10907530ef04" />
+    <Project Path="clean-architecture.ServiceDefaults/clean-architecture.ServiceDefaults.csproj" />
+  </Folder>
   <Folder Name="/src/Presentation/">
     <Project Path="clean-architecture.WebApi/clean-architecture.WebApi.csproj" Id="56b3acba-f6ad-4198-81b0-15baae36222b" />
   </Folder>

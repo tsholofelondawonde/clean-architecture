@@ -10,7 +10,7 @@ namespace clean_architecture.WebApi.Infrastructure.OpenApiSchemaTransformers;
 /// </summary>
 internal sealed class DomainEntityTypeResolver : DefaultJsonTypeInfoResolver
 {
-    private static readonly string DomainNamespace = "clean_architecture.Domain";
+    private const string DomainNamespace = "clean_architecture.Domain";
 
     public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
     {

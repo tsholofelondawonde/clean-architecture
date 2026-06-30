@@ -7,7 +7,7 @@ using SharedKernel;
 
 namespace clean_architecture.application.Features.Notes.GetById;
 
-internal class GetNoteByIdQueryHandler(IApplicationDbContext context,
+internal sealed class GetNoteByIdQueryHandler(IApplicationDbContext context,
     ILogger<GetNoteByIdQueryHandler> logger) : IQueryHandler<GetNoteByIdQuery, GetNoteByIdResponse>
 {
     private readonly IApplicationDbContext _context = context;
@@ -15,9 +15,7 @@ internal class GetNoteByIdQueryHandler(IApplicationDbContext context,
 
     public async Task<Result<GetNoteByIdResponse>> Handle(GetNoteByIdQuery query, CancellationToken cancellationToken)
     {
-        try
-        {
-            var noteResponse = await _context.Notes
+        var noteResponse = await _context.Notes
             .Where(n => !n.IsDeleted && n.Id == query.Id)
             .AsNoTracking()
             .Select(n => new GetNoteByIdResponse(
@@ -28,21 +26,14 @@ internal class GetNoteByIdQueryHandler(IApplicationDbContext context,
                 n.UpdatedAt,
                 n.IsDeleted
             ))
-           .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken);
 
-            if(noteResponse == null)
-            {
-                _logger.LogWarning("Note with ID {NoteId} not found.", query.Id);
-                return Result.Failure<GetNoteByIdResponse>(NoteErrors.NotFound);
-            }
-
-            return Result.Success(noteResponse);
-
-        }
-        catch (Exception)
+        if (noteResponse == null)
         {
-
-            throw;
+            _logger.LogWarning("Note with ID {NoteId} not found.", query.Id);
+            return Result.Failure<GetNoteByIdResponse>(NoteErrors.NotFound);
         }
+
+        return Result.Success(noteResponse);
     }
 }

@@ -18,16 +18,10 @@ internal static class ServiceCollectionExtensions
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
         // Handle generic types (e.g., List<Branch>)
-        if (underlyingType.IsGenericType)
+        if (underlyingType.IsGenericType &&
+            underlyingType.GetGenericArguments().Any(IsDomainType))
         {
-            // Check if any generic argument is a domain type
-            foreach (var genericArg in underlyingType.GetGenericArguments())
-            {
-                if (IsDomainType(genericArg))
-                {
-                    return true;
-                }
-            }
+            return true;
         }
 
         var typeNamespace = underlyingType.Namespace ?? string.Empty;
