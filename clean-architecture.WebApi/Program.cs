@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // GENERATOR_ASPIRE_TOKEN: WITHOUT_ASPIRE
 builder.Services.AddObservability(builder.Environment, builder.Configuration);
+builder.Services.AddHttpResilience();
 
 builder.Services
     .AddOpenApi()

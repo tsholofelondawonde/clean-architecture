@@ -87,6 +87,14 @@ public static class DependencyInjection
                         options.UseNpgsql(connectionString, npgsqlOptions =>
                         {
                             npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.PostgreSql);
+
+                            // Add connection resilience with retry policy.
+                            npgsqlOptions.EnableRetryOnFailure(
+                                maxRetryCount: 3,
+                                maxRetryDelay: TimeSpan.FromSeconds(5),
+                                errorCodesToAdd: null);
+
+                            // Set command timeout to 60 seconds for complex queries.
                             npgsqlOptions.CommandTimeout(60);
                         });
                         break;

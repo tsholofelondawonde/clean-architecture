@@ -3,6 +3,8 @@ using clean_architecture.application.Abstractions.Messaging;
 using Microsoft.Extensions.Configuration;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Retry;
 using SharedKernel;
 
 namespace clean_architecture.application;
@@ -46,6 +48,21 @@ public static class DependencyInjection
         // Apply logging decorators
         services.Decorate(typeof(IQueryHandler<,>), typeof(LoggingDecorator.QueryHandler<,>));
         services.Decorate(typeof(ICommandHandler<,>), typeof(LoggingDecorator.CommandHandler<,>));
+
+        // Retry transient query failures (e.g. momentary DB connectivity issues). Commands are
+        // intentionally not retried here to avoid re-running non-idempotent writes.
+        services.AddResiliencePipeline(ResilienceDecorator.QueryPipelineKey, static builder =>
+        {
+            builder.AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                BackoffType = DelayBackoffType.Exponential,
+                Delay = TimeSpan.FromMilliseconds(200),
+            });
+
+            builder.AddTimeout(TimeSpan.FromSeconds(10));
+        });
+        services.Decorate(typeof(IQueryHandler<,>), typeof(ResilienceDecorator.QueryHandler<,>));
 
         // Only decorate ICommandHandler<> (no-result variant) if implementations exist
         if (services.Any(d => d.ServiceType.IsConstructedGenericType &&
