@@ -1,16 +1,20 @@
 using clean_architecture.application.Abstractions.Data;
 using clean_architecture.application.Abstractions.Messaging;
+using clean_architecture.application.Features.Notes;
 using clean_architecture.domain.NotesManagement.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
 namespace clean_architecture.application.Features.Notes.Update;
 
 internal sealed class UpdateNoteCommandHandler(IApplicationDbContext context,
+    HybridCache cache,
     ILogger<UpdateNoteCommandHandler> logger) : ICommandHandler<UpdateNoteCommand, UpdateNoteResponse>
 {
     private readonly IApplicationDbContext _context = context;
+    private readonly HybridCache _cache = cache;
     private readonly ILogger<UpdateNoteCommandHandler> _logger = logger;
 
     public async Task<Result<UpdateNoteResponse>> Handle(UpdateNoteCommand command, CancellationToken cancellationToken)
@@ -44,6 +48,8 @@ internal sealed class UpdateNoteCommandHandler(IApplicationDbContext context,
             note.CreatedAt,
             note.UpdatedAt,
             note.IsDeleted);
+
+        await _cache.RemoveByTagAsync(NotesCacheKeys.NotesTag, cancellationToken);
 
         return Result.Success(response);
     }

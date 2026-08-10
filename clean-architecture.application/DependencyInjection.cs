@@ -1,5 +1,6 @@
 ﻿using clean_architecture.application.Abstractions.Behaviours;
 using clean_architecture.application.Abstractions.Messaging;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,20 +28,11 @@ public static class DependencyInjection
 
         var assembly = typeof(DependencyInjection).Assembly;
 
+        // In-process cache-aside store for queries opting in via ICachedQuery.
+        services.AddHybridCache(ConfigureCaching);
+
         // Register query, command and domain event handlers from this assembly
-        services.Scan(scan => scan.FromAssemblies(assembly)
-            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
+        ScanHandlers(services, assembly);
 
         // Apply validation decorators first so logging wraps validated handlers
         services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationDecorator.CommandHandler<,>));
@@ -64,6 +56,10 @@ public static class DependencyInjection
         });
         services.Decorate(typeof(IQueryHandler<,>), typeof(ResilienceDecorator.QueryHandler<,>));
 
+        // Serve cached results (for ICachedQuery queries) outermost, so cache hits skip
+        // resilience/logging/DB entirely.
+        services.Decorate(typeof(IQueryHandler<,>), typeof(CachingDecorator.QueryHandler<,>));
+
         // Only decorate ICommandHandler<> (no-result variant) if implementations exist
         if (services.Any(d => d.ServiceType.IsConstructedGenericType &&
                               d.ServiceType.GetGenericTypeDefinition() == typeof(ICommandHandler<>)))
@@ -76,5 +72,33 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
         return services;
+    }
+
+    private static void ScanHandlers(IServiceCollection services, System.Reflection.Assembly assembly)
+    {
+        services.Scan(scan => scan.FromAssemblies(assembly)
+            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
+    }
+
+    private static void ConfigureCaching(HybridCacheOptions options)
+    {
+        options.DefaultEntryOptions = new HybridCacheEntryOptions
+        {
+            Expiration = TimeSpan.FromMinutes(5),
+            LocalCacheExpiration = TimeSpan.FromMinutes(5),
+        };
+        options.MaximumPayloadBytes = 1 * 1024 * 1024;
+        options.MaximumKeyLength = 256;
     }
 }
