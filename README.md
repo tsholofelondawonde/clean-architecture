@@ -37,6 +37,8 @@ the CLI copies and tokenises the files in this repository — substituting proje
 | DI Extensions | Scrutor |
 | API Docs | Scalar (OpenAPI) |
 | Testing | xUnit, Moq, FluentAssertions, Bogus |
+| Orchestration | .NET Aspire (AppHost starts the API and the frontend together) |
+| Frontend | Next.js (App Router), React 19, TypeScript, TailwindCSS 4 |
 
 ---
 
@@ -104,13 +106,24 @@ Set `"Provider"` to `"PostgreSql"` and supply a Postgres connection string to us
 dotnet ef database update --project clean-architecture.infrastructure --startup-project clean-architecture.WebApi
 ```
 
-### Run
+### Run the API only
 
 ```bash
 dotnet run --project clean-architecture.WebApi
 ```
 
 The API starts on `http://localhost:5286`. Open `http://localhost:5286/scalar` for the interactive API reference (development only).
+
+### Run the API and frontend together (via Aspire)
+
+```bash
+cd clean-architecture.Web && npm install && cd ..   # one-time
+dotnet run --project clean-architecture.AppHost
+```
+
+This opens the Aspire dashboard and starts both the `clean-architecture-webapi` and `clean-architecture-web` (Next.js) resources, wiring the frontend's API base URL automatically. The Next.js app is available at `http://localhost:3000`.
+
+To run the frontend standalone (outside Aspire), copy `clean-architecture.Web/.env.local.example` to `.env.local` and run `npm run dev` from `clean-architecture.Web/`.
 
 ---
 
@@ -122,7 +135,9 @@ clean-architecture/
 ├── clean-architecture.domain/         # Aggregates, value objects, domain events, errors
 ├── clean-architecture.application/    # CQRS handlers, validation, abstractions
 ├── clean-architecture.infrastructure/ # EF Core, migrations, event dispatcher
-└── clean-architecture.WebApi/         # Minimal API endpoints, middleware, startup
+├── clean-architecture.WebApi/         # Minimal API endpoints, middleware, startup
+├── clean-architecture.Web/            # Next.js frontend (App Router)
+└── clean-architecture.AppHost/        # .NET Aspire orchestration (starts API + frontend)
 ```
 
 ---

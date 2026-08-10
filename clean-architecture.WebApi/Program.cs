@@ -19,7 +19,7 @@ builder.Services
     .AddOpenApi()
     .AddResponseCompression()
     .AddApplication(builder.Configuration)
-    .AddPresentation()
+    .AddPresentation(builder.Configuration)
     .AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
@@ -39,6 +39,8 @@ app.UseRequestContextLogging();
 app.UseResponseCompression();
 
 app.UseRouting();
+
+app.UseCors(clean_architecture.WebApi.DependencyInjection.FrontendCorsPolicy);
 
 if (app.Environment.IsDevelopment())
 {
