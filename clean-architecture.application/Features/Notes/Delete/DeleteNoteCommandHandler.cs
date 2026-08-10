@@ -1,16 +1,20 @@
 using clean_architecture.application.Abstractions.Data;
 using clean_architecture.application.Abstractions.Messaging;
+using clean_architecture.application.Features.Notes;
 using clean_architecture.domain.NotesManagement.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
 namespace clean_architecture.application.Features.Notes.Delete;
 
 internal sealed class DeleteNoteCommandHandler(IApplicationDbContext context,
+    HybridCache cache,
     ILogger<DeleteNoteCommandHandler> logger) : ICommandHandler<DeleteNoteCommand, bool>
 {
     private readonly IApplicationDbContext _context = context;
+    private readonly HybridCache _cache = cache;
     private readonly ILogger<DeleteNoteCommandHandler> _logger = logger;
 
     public async Task<Result<bool>> Handle(DeleteNoteCommand command, CancellationToken cancellationToken)
@@ -39,6 +43,8 @@ internal sealed class DeleteNoteCommandHandler(IApplicationDbContext context,
             _logger.LogError("Failed to delete note with ID {NoteId}. No changes were saved to the database.", command.Id);
             return Result.Failure<bool>(new Error("Note.DeletionFailed", "Failed to delete the note due to an unknown error.", ErrorType.Failure));
         }
+
+        await _cache.RemoveByTagAsync(NotesCacheKeys.NotesTag, cancellationToken);
 
         return Result.Success(true);
     }

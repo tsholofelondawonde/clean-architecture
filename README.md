@@ -32,6 +32,8 @@ the CLI copies and tokenises the files in this repository — substituting proje
 | Databases | SQL Server, PostgreSQL |
 | Validation | FluentValidation 12 |
 | Logging | Serilog (console + SQL Server sink) |
+| Resilience | Polly (retry, timeout) |
+| Caching | HybridCache (in-process, opt-in via `ICachedQuery`) |
 | DI Extensions | Scrutor |
 | API Docs | Scalar (OpenAPI) |
 | Testing | xUnit, Moq, FluentAssertions, Bogus |
@@ -54,7 +56,7 @@ SharedKernel
 | --- | --- |
 | **SharedKernel** | Base types: `Entity`, `ValueObject`, `Result<T>`, `Error`, domain event interfaces |
 | **Domain** | Aggregates, value objects, domain events, and domain errors — zero framework dependencies |
-| **Application** | Use cases as CQRS command/query handlers; validation and logging decorators |
+| **Application** | Use cases as CQRS command/query handlers; validation, resilience, caching, and logging decorators |
 | **Infrastructure** | EF Core `DbContext`, migrations, domain event dispatcher, health checks, `DateTimeProvider` |
 | **WebApi** | Minimal API endpoints, global exception handler, problem-details mapping, Scalar UI |
 
@@ -63,7 +65,9 @@ SharedKernel
 - **CQRS** — Commands and queries implemented via `ICommandHandler` / `IQueryHandler` with Scrutor decorator chaining
 - **Domain Events** — `NoteCreatedDomainEvent`, `NoteUpdatedDomainEvent`, `NoteDeletedDomainEvent` dispatched after `SaveChanges`
 - **Result / Railway Pattern** — `Result<T>` and `Error` replace exception-driven flow for domain outcomes
-- **Decorator Pipeline** — `ValidationDecorator` → `LoggingDecorator` → handler, registered transparently via Scrutor
+- **Decorator Pipeline** — `ValidationDecorator` → `ResilienceDecorator` → `CachingDecorator` → `LoggingDecorator` → handler, registered transparently via Scrutor
+- **Resilience** — Query handlers are wrapped in a named Polly pipeline (3 retries, exponential backoff, 10s timeout) for transient failures; commands are not retried to avoid re-running non-idempotent writes. The PostgreSQL and SQL Server providers also enable EF Core's connection-level retry-on-failure
+- **Hybrid Caching** — Queries implementing `ICachedQuery` (cache key, expiration, tags) are cached via `HybridCache`; Notes command handlers invalidate cached entries by tag on create/update/delete
 - **Value Objects** — `NoteTitle` and `NoteContent` enforce invariants at the type level
 
 ---

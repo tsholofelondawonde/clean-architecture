@@ -1,14 +1,20 @@
 using clean_architecture.application.Abstractions.Data;
 using clean_architecture.application.Abstractions.Messaging;
+using clean_architecture.application.Features.Notes;
 using clean_architecture.domain.NotesManagement.Aggregates;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
 namespace clean_architecture.application.Features.Notes.Create;
 
-public sealed class CreateNoteCommandHandler(IApplicationDbContext context, ILogger<CreateNoteCommandHandler> logger) : ICommandHandler<CreateNoteCommand, CreateNoteResponse>
+public sealed class CreateNoteCommandHandler(
+    IApplicationDbContext context,
+    HybridCache cache,
+    ILogger<CreateNoteCommandHandler> logger) : ICommandHandler<CreateNoteCommand, CreateNoteResponse>
 {
     private readonly IApplicationDbContext _context = context;
+    private readonly HybridCache _cache = cache;
     private readonly ILogger<CreateNoteCommandHandler> _logger = logger;
 
     public async Task<Result<CreateNoteResponse>> Handle(CreateNoteCommand command, CancellationToken cancellationToken)
@@ -41,6 +47,8 @@ public sealed class CreateNoteCommandHandler(IApplicationDbContext context, ILog
             note.CreatedAt,
             note.UpdatedAt,
             note.IsDeleted);
+
+        await _cache.RemoveByTagAsync(NotesCacheKeys.NotesTag, cancellationToken);
 
         return Result.Success(response);
     }
