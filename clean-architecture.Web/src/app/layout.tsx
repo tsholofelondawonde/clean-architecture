@@ -26,7 +26,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <header className="border-b border-border">
+          <div className="mx-auto flex w-full max-w-3xl items-center px-6 py-4">
+            <span className="text-sm font-semibold tracking-tight">
+              Clean Architecture
+            </span>
+          </div>
+        </header>
+        <main className="flex flex-1 flex-col items-center">{children}</main>
+      </body>
     </html>
   );
 }

@@ -9,6 +9,9 @@ type NoteFormProps = {
   note?: Note;
 };
 
+const inputClasses =
+  "rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/30";
+
 export function NoteForm({ note }: NoteFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(note?.title ?? "");
@@ -38,30 +41,49 @@ export function NoteForm({ note }: NoteFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <input
-        type="text"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder="Title"
-        required
-        className="rounded border border-black/10 px-3 py-2 dark:border-white/20"
-      />
-      <textarea
-        value={content}
-        onChange={(event) => setContent(event.target.value)}
-        placeholder="Content"
-        required
-        rows={4}
-        className="rounded border border-black/10 px-3 py-2 dark:border-white/20"
-      />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="note-title" className="text-sm font-medium">
+          Title
+        </label>
+        <input
+          id="note-title"
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="e.g. Grocery list"
+          required
+          className={inputClasses}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="note-content" className="text-sm font-medium">
+          Content
+        </label>
+        <textarea
+          id="note-content"
+          value={content}
+          onChange={(event) => setContent(event.target.value)}
+          placeholder="Write your note here..."
+          required
+          rows={4}
+          className={inputClasses}
+        />
+      </div>
+
+      {error && (
+        <p role="alert" className="text-sm text-danger">
+          {error}
+        </p>
+      )}
+
       <button
         type="submit"
         disabled={isSubmitting}
-        className="self-start rounded bg-foreground px-4 py-2 text-background disabled:opacity-50"
+        className="self-start rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition active:scale-[0.98] disabled:opacity-50"
       >
-        {note ? "Save changes" : "Add note"}
+        {isSubmitting ? "Saving..." : note ? "Save changes" : "Add note"}
       </button>
     </form>
   );
