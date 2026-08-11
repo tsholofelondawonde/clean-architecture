@@ -8,12 +8,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// GENERATOR_ASPIRE_TOKEN: WITH_ASPIRE
-// builder.AddServiceDefaults();
-
-// GENERATOR_ASPIRE_TOKEN: WITHOUT_ASPIRE
-builder.Services.AddObservability(builder.Environment, builder.Configuration);
-builder.Services.AddHttpResilience();
+builder.AddServiceDefaults();
 
 builder.Services
     .AddOpenApi()
