@@ -1,6 +1,7 @@
 ﻿using clean_architecture.application.Abstractions.Messaging;
 using clean_architecture.application.Features.Notes.GetById;
 using clean_architecture.WebApi.Extensions;
+using clean_architecture.WebApi.Infrastructure;
 
 namespace clean_architecture.WebApi.Endpoints.Notes;
 
@@ -20,7 +21,7 @@ internal sealed class GetById : IEndpoint
 
             var query = new GetNoteByIdQuery(id);
             var result = await handler.Handle(query, cancellation);
-            return result.Match(Results.Ok, Results.NotFound);
+            return result.Match(Results.Ok, CustomResults.Problem);
         })
         .WithTags(Tags.Notes)
         .WithName("GetNotesById")

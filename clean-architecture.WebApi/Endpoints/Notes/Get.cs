@@ -1,6 +1,7 @@
 ﻿using clean_architecture.application.Abstractions.Messaging;
 using clean_architecture.application.Features.Notes.Get;
 using clean_architecture.WebApi.Extensions;
+using clean_architecture.WebApi.Infrastructure;
 
 namespace clean_architecture.WebApi.Endpoints.Notes;
 
@@ -13,7 +14,7 @@ internal sealed class Get : IEndpoint
             var query = new GetNotesQuery();
             var results = await handler.Handle(query, cancellation);
 
-            return results.Match(Results.Ok, Results.NotFound);
+            return results.Match(Results.Ok, CustomResults.Problem);
 
         })
         .WithTags(Tags.Notes)

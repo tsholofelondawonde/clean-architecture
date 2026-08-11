@@ -30,6 +30,10 @@ internal sealed class GetNotesQueryHandler(IApplicationDbContext context, ILogge
 
             return Result.Success(noteResponse);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred while getting notes.");
